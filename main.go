@@ -36,9 +36,28 @@ func handleGetFavorites(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func handlePostFavorites(w http.ResponseWriter, r *http.Request) {
+	var f Favorite
+	if err := json.NewDecoder(r.Body).Decode(&f); err != nil {
+		http.Error(w, "invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	f.SavedAt = time.Now()
+	favorites = append(favorites, f)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(favorites); err != nil {
+		log.Printf("Error encoding favorites: %v", err)
+	}
+
+}
+
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /favorites", handleGetFavorites)
+	mux.HandleFunc("POST /favorites", handlePostFavorites)
 
 	log.Println("listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", mux))

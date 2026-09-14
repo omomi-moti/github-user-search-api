@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"sync"
 )
 
 type Favorite struct {
@@ -13,6 +14,8 @@ type Favorite struct {
 	Name      string    `json:"name"`
 	SavedAt   time.Time `json:"savedAt"`
 }
+
+var mu sync.Mutex
 
 var favorites = []Favorite{ //でもデータを作成
 	{
@@ -30,6 +33,8 @@ var favorites = []Favorite{ //でもデータを作成
 }
 
 func handleGetFavorites(w http.ResponseWriter, r *http.Request) {
+	mu.Lock()
+	defer mu.Unlock()
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(favorites); err != nil {
 		log.Printf("Error encoding favorites: %v", err)
@@ -37,6 +42,9 @@ func handleGetFavorites(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleGetFavorite(w http.ResponseWriter, r *http.Request) {
+	mu.Lock()
+	defer mu.Unlock()
+
 	username := r.PathValue("username")
 
 	for _, f := range favorites {
@@ -52,6 +60,9 @@ func handleGetFavorite(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlePostFavorites(w http.ResponseWriter, r *http.Request) {
+	mu.Lock()
+	defer mu.Unlock()
+	
 	var f Favorite
 	if err := json.NewDecoder(r.Body).Decode(&f); err != nil {
 		http.Error(w, "invalid JSON", http.StatusBadRequest)

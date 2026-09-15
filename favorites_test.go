@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestGetFavorites(t *testing.T) {
@@ -91,5 +92,53 @@ func TestPostFavorites(t *testing.T) {
 				t.Errorf("len(s.favorites) - before = %d, want %d", after, tt.wantAdded)
 			}
 		})
+	}
+}
+
+func TestGetFavoriteName(t *testing.T) {
+	tests := []struct {
+		name     string
+		username string
+		wantName string // レスポンスのJSONに含まれているはずの文字列
+	}{
+		{name: "名前が設定されていればその名前を返す", username: "omomi-moti", wantName: `"name":"鈴木聖也"`},
+		{name: "名前が未設定ならnullを返す", username: "onevcat", wantName: `"name":null`},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := newServer()
+			req := httptest.NewRequest(http.MethodGet, "/favorites/"+tt.username, nil)
+			rec := httptest.NewRecorder()
+			s.routes().ServeHTTP(rec, req)
+
+			if rec.Code != http.StatusOK {
+				t.Fatalf("status = %d, want %d", rec.Code, http.StatusOK)
+			}
+
+			// デコードすると null とキーなしの区別がつかないため、JSONの文字列のまま確認する
+			if body := rec.Body.String(); !strings.Contains(body, tt.wantName) {
+				t.Errorf("body = %s, want to contain %s", body, tt.wantName)
+			}
+		})
+	}
+}
+
+func TestPostFavoritesSavedAt(t *testing.T) {
+	s := newServer()
+	req := httptest.NewRequest(http.MethodPost, "/favorites", strings.NewReader(`{"username":"swift"}`))
+	rec := httptest.NewRecorder()
+	s.routes().ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusCreated)
+	}
+
+	added := s.favorites[len(s.favorites)-1]
+	if got := added.SavedAt.Nanosecond(); got != 0 {
+		t.Errorf("SavedAt.Nanosecond() = %d, want 0", got)
+	}
+	if got := added.SavedAt.Location(); got != time.UTC {
+		t.Errorf("SavedAt.Location() = %v, want UTC", got)
 	}
 }

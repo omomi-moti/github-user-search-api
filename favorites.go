@@ -56,7 +56,7 @@ func (s *server) handlePostFavorites(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	f.SavedAt = time.Now()
+	f.SavedAt = time.Now().UTC().Truncate(time.Second)
 	s.favorites = append(s.favorites, f)
 
 	w.Header().Set("Content-Type", "application/json")

@@ -10,7 +10,7 @@ import (
 type Favorite struct {
 	Username  string    `json:"username"`
 	AvatarURL string    `json:"avatarURL"`
-	Name      string    `json:"name"`
+	Name      *string   `json:"name"`
 	SavedAt   time.Time `json:"savedAt"`
 }
 

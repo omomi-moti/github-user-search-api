@@ -16,13 +16,13 @@ func newServer() *server {
 		favorites: []Favorite{
 			{
 				Username:  "omomi-moti",
-				AvatarURL: "https://avatars.githubusercontent.com/u/1?v=4",
+				AvatarURL: "https://avatars.githubusercontent.com/u/200570868?v=4",
 				Name:      new("鈴木聖也"),
 				SavedAt:   time.Date(2026, 9, 13, 10, 0, 0, 0, time.UTC),
 			},
 			{
 				Username:  "onevcat",
-				AvatarURL: "https://avatars.githubusercontent.com/u/2?v=4",
+				AvatarURL: "https://avatars.githubusercontent.com/u/1019875?v=4",
 				SavedAt:   time.Date(2026, 9, 13, 11, 30, 0, 0, time.UTC),
 			},
 		},

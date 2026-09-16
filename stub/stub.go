@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"log"
 	"net/http"
+	// "strconv" // 2ページ目の処理を戻すときに使う
 )
 
 // 返すJSONは、iOSのAPIClientTestsのテスト用JSONと同じ内容にしている
@@ -27,6 +28,15 @@ func routes() http.Handler {
 }
 
 func handleSearchUsers(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query().Get("q")
+	if q == "" {
+		http.Error(w, http.StatusText(http.StatusUnprocessableEntity), http.StatusUnprocessableEntity)
+		return
+	}
+	if status, ok := errorStatusFor(q); ok {
+		http.Error(w, http.StatusText(status), status)
+		return
+	}
 	writeJSON(w, searchUsersJSON)
 }
 
@@ -43,6 +53,14 @@ func handleRepos(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(status), status)
 		return
 	}
+	// iOSのUserDetailViewModelは、1ページが30件未満なら次のページを取りに来ない。
+	// repos.jsonは1件なので2ページ目のリクエストは来ないため、処理を無効にしている。
+	// repos.jsonを30件以上に増やしたときは、以下と import の "strconv" を戻す。
+	// page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	// if err == nil && page >= 2 {
+	// 	writeJSON(w, []byte("[]"))
+	// 	return
+	// }
 	writeJSON(w, reposJSON)
 }
 

@@ -31,11 +31,31 @@ func handleSearchUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleUserDetail(w http.ResponseWriter, r *http.Request) {
+	if status, ok := errorStatusFor(r.PathValue("username")); ok {
+		http.Error(w, http.StatusText(status), status)
+		return
+	}
 	writeJSON(w, userDetailJSON)
 }
 
 func handleRepos(w http.ResponseWriter, r *http.Request) {
+	if status, ok := errorStatusFor(r.PathValue("username")); ok {
+		http.Error(w, http.StatusText(status), status)
+		return
+	}
 	writeJSON(w, reposJSON)
+}
+
+func errorStatusFor(name string) (int, bool) {
+	switch name {
+	case "notfound":
+		return http.StatusNotFound, true
+	case "ratelimited":
+		return http.StatusForbidden, true
+	case "servererror":
+		return http.StatusInternalServerError, true
+	}
+	return 0, false
 }
 
 // writeJSON はJSONをステータス200で返す

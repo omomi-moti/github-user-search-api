@@ -1,6 +1,21 @@
 package main
 
-import "net/http"
+import (
+	_ "embed"
+	"log"
+	"net/http"
+)
+
+// 返すJSONは、iOSのAPIClientTestsのテスト用JSONと同じ内容にしている
+
+//go:embed fixtures/search_users.json
+var searchUsersJSON []byte
+
+//go:embed fixtures/user_detail.json
+var userDetailJSON []byte
+
+//go:embed fixtures/repos.json
+var reposJSON []byte
 
 // routes はGitHub APIと同じパスとハンドラの対応を返す。main とテストの両方で使う
 func routes() http.Handler {
@@ -11,17 +26,22 @@ func routes() http.Handler {
 	return mux
 }
 
-// TODO: GitHub APIと同じ形のJSONを返す
 func handleSearchUsers(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
+	writeJSON(w, searchUsersJSON)
 }
 
-// TODO: GitHub APIと同じ形のJSONを返す
 func handleUserDetail(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
+	writeJSON(w, userDetailJSON)
 }
 
-// TODO: GitHub APIと同じ形のJSONを返す
 func handleRepos(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
+	writeJSON(w, reposJSON)
+}
+
+// writeJSON はJSONをステータス200で返す
+func writeJSON(w http.ResponseWriter, body []byte) {
+	w.Header().Set("Content-Type", "application/json")
+	if _, err := w.Write(body); err != nil {
+		log.Printf("Error writing response: %v", err)
+	}
 }

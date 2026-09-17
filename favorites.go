@@ -73,3 +73,19 @@ func (s *server) handlePostFavorites(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error encoding favorites: %v", err)
 	}
 }
+
+func (s *server) handleDeleteFavorite(w http.ResponseWriter, r *http.Request) {
+	username := r.PathValue("username")
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for i, f := range s.favorites {
+		if f.Username == username {
+			s.favorites = append(s.favorites[:i], s.favorites[i+1:]...)
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+	}
+	http.Error(w, "favorite not found", http.StatusNotFound)
+}

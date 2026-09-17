@@ -34,5 +34,6 @@ func (s *server) routes() http.Handler {
 	mux.HandleFunc("GET /favorites", s.handleGetFavorites)
 	mux.HandleFunc("POST /favorites", s.handlePostFavorites)
 	mux.HandleFunc("GET /favorites/{username}", s.handleGetFavorite)
+	mux.HandleFunc("DELETE /favorites/{username}", s.handleDeleteFavorite)
 	return mux
 }

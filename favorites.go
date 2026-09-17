@@ -42,8 +42,6 @@ func (s *server) handleGetFavorite(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) handlePostFavorites(w http.ResponseWriter, r *http.Request) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
 
 	var f Favorite
 	if err := json.NewDecoder(r.Body).Decode(&f); err != nil {
@@ -56,12 +54,22 @@ func (s *server) handlePostFavorites(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for _, existing := range s.favorites {
+		if existing.Username == f.Username {
+			http.Error(w, "favorite already exists", http.StatusConflict)
+			return
+		}
+	}
+
 	f.SavedAt = time.Now().UTC().Truncate(time.Second)
 	s.favorites = append(s.favorites, f)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(s.favorites); err != nil {
+	if err := json.NewEncoder(w).Encode(f); err != nil {
 		log.Printf("Error encoding favorites: %v", err)
 	}
 }

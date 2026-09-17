@@ -73,6 +73,7 @@ func TestPostFavorites(t *testing.T) {
 		{name: "正しいJSONなら201で追加される", body: `{"username":"swift"}`, wantStatus: http.StatusCreated, wantAdded: 1},
 		{name: "壊れたJSONなら400で追加されない", body: `{"username":`, wantStatus: http.StatusBadRequest, wantAdded: 0},
 		{name: "usernameが空なら400で追加されない", body: `{"username":""}`, wantStatus: http.StatusBadRequest, wantAdded: 0},
+		{name: "すでに存在するなら409で追加されない", body: `{"username":"omomi-moti"}`, wantStatus: http.StatusConflict, wantAdded: 0},
 	}
 
 	for _, tt := range tests {
@@ -132,6 +133,14 @@ func TestPostFavoritesSavedAt(t *testing.T) {
 
 	if rec.Code != http.StatusCreated {
 		t.Fatalf("status = %d, want %d", rec.Code, http.StatusCreated)
+	}
+
+	var got Favorite
+	if err := json.NewDecoder(rec.Body).Decode(&got); err != nil {
+		t.Fatalf("failed to decode response body: %v", err)
+	}
+	if got.Username != "swift" {
+		t.Errorf("got.Username = %s, want %s", got.Username, "swift")
 	}
 
 	added := s.favorites[len(s.favorites)-1]

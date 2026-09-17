@@ -59,7 +59,7 @@ func (s *server) handlePostFavorites(w http.ResponseWriter, r *http.Request) {
 
 	for _, existing := range s.favorites {
 		if existing.Username == f.Username {
-			http.Error(w, "favorite already exisits", http.StatusConflict)
+			http.Error(w, "favorite already exists", http.StatusConflict)
 			return
 		}
 	}

@@ -42,8 +42,6 @@ func (s *server) handleGetFavorite(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) handlePostFavorites(w http.ResponseWriter, r *http.Request) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
 
 	var f Favorite
 	if err := json.NewDecoder(r.Body).Decode(&f); err != nil {
@@ -55,6 +53,9 @@ func (s *server) handlePostFavorites(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "username is required", http.StatusBadRequest)
 		return
 	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	for _, existing := range s.favorites {
 		if existing.Username == f.Username {

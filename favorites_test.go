@@ -151,3 +151,59 @@ func TestPostFavoritesSavedAt(t *testing.T) {
 		t.Errorf("SavedAt.Location() = %v, want UTC", got)
 	}
 }
+
+func TestDeleteFavorite(t *testing.T) {
+	tests := []struct {
+		name        string
+		username    string
+		wantStatus  int
+		wantRemoved int // 減る件数
+	}{
+		{name: "登録済みなら204で削除される", username: "omomi-moti", wantStatus: http.StatusNoContent, wantRemoved: 1},
+		{name: "登録されていなければ404で何も消えない", username: "nonexistent", wantStatus: http.StatusNotFound, wantRemoved: 0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := newServer()
+			before := len(s.favorites)
+
+			req := httptest.NewRequest(http.MethodDelete, "/favorites/"+tt.username, nil)
+			rec := httptest.NewRecorder()
+			s.routes().ServeHTTP(rec, req)
+
+			if rec.Code != tt.wantStatus {
+				t.Fatalf("status = %d, want %d", rec.Code, tt.wantStatus)
+			}
+			if removed := before - len(s.favorites); removed != tt.wantRemoved {
+				t.Errorf("removed = %d, want %d", removed, tt.wantRemoved)
+			}
+		})
+	}
+}
+
+func TestDeleteAllFavoritesReturnsEmptyArray(t *testing.T) {
+	s := newServer()
+	handler := s.routes()
+
+	// デモデータの2件を両方削除する
+	for _, username := range []string{"omomi-moti", "onevcat"} {
+		req := httptest.NewRequest(http.MethodDelete, "/favorites/"+username, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusNoContent {
+			t.Fatalf("DELETE %s: status = %d, want %d", username, rec.Code, http.StatusNoContent)
+		}
+	}
+
+	// 0件になった一覧を取得する
+	req := httptest.NewRequest(http.MethodGet, "/favorites", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	// iOSの[ServerFavorite]はnullを読めないので、[]で返ることを確かめる
+	if body := strings.TrimSpace(rec.Body.String()); body != "[]" {
+		t.Errorf("body = %s, want []", body)
+	}
+}

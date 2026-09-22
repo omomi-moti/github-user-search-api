@@ -12,7 +12,7 @@ func TestRoutes(t *testing.T) {
 		path       string
 		wantStatus int
 	}{
-		{name: "検索できる", path: "/search/users?q=omomi-moti", wantStatus: http.StatusOK},
+		{name: "検索できる", path: "/search/users?q=octocat", wantStatus: http.StatusOK},
 		{name: "検索キーワードがからなら422", path: "/search/users?q=", wantStatus: http.StatusUnprocessableEntity},
 		{name: "検索キーワードがservererrorなら500", path: "/search/users?q=servererror", wantStatus: http.StatusInternalServerError},
 		{name: "ユーザー詳細を取得できる", path: "/users/swiftlang", wantStatus: http.StatusOK},

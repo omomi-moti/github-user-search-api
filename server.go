@@ -15,9 +15,9 @@ func newServer() *server {
 	return &server{
 		favorites: []Favorite{
 			{
-				Username:  "omomi-moti",
-				AvatarURL: "https://avatars.githubusercontent.com/u/200570868?v=4",
-				Name:      new("鈴木聖也"),
+				Username:  "octocat",
+				AvatarURL: "https://avatars.githubusercontent.com/u/583231?v=4",
+				Name:      new("The Octocat"),
 				SavedAt:   time.Date(2026, 9, 13, 10, 0, 0, 0, time.UTC),
 			},
 			{

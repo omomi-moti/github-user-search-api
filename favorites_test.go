@@ -45,7 +45,7 @@ func TestGetFavorite(t *testing.T) {
 		username   string
 		wantStatus int
 	}{
-		{name: "存在するusernameなら200", username: "omomi-moti", wantStatus: http.StatusOK},
+		{name: "存在するusernameなら200", username: "octocat", wantStatus: http.StatusOK},
 		{name: "存在しないusernameなら404", username: "nobody", wantStatus: http.StatusNotFound},
 	}
 
@@ -73,7 +73,7 @@ func TestPostFavorites(t *testing.T) {
 		{name: "正しいJSONなら201で追加される", body: `{"username":"swift"}`, wantStatus: http.StatusCreated, wantAdded: 1},
 		{name: "壊れたJSONなら400で追加されない", body: `{"username":`, wantStatus: http.StatusBadRequest, wantAdded: 0},
 		{name: "usernameが空なら400で追加されない", body: `{"username":""}`, wantStatus: http.StatusBadRequest, wantAdded: 0},
-		{name: "すでに存在するなら409で追加されない", body: `{"username":"omomi-moti"}`, wantStatus: http.StatusConflict, wantAdded: 0},
+		{name: "すでに存在するなら409で追加されない", body: `{"username":"octocat"}`, wantStatus: http.StatusConflict, wantAdded: 0},
 	}
 
 	for _, tt := range tests {
@@ -102,7 +102,7 @@ func TestGetFavoriteName(t *testing.T) {
 		username string
 		wantName string // レスポンスのJSONに含まれているはずの文字列
 	}{
-		{name: "名前が設定されていればその名前を返す", username: "omomi-moti", wantName: `"name":"鈴木聖也"`},
+		{name: "名前が設定されていればその名前を返す", username: "octocat", wantName: `"name":"The Octocat"`},
 		{name: "名前が未設定ならnullを返す", username: "onevcat", wantName: `"name":null`},
 	}
 
@@ -159,7 +159,7 @@ func TestDeleteFavorite(t *testing.T) {
 		wantStatus  int
 		wantRemoved int // 減る件数
 	}{
-		{name: "登録済みなら204で削除される", username: "omomi-moti", wantStatus: http.StatusNoContent, wantRemoved: 1},
+		{name: "登録済みなら204で削除される", username: "octocat", wantStatus: http.StatusNoContent, wantRemoved: 1},
 		{name: "登録されていなければ404で何も消えない", username: "nonexistent", wantStatus: http.StatusNotFound, wantRemoved: 0},
 	}
 
@@ -187,7 +187,7 @@ func TestDeleteAllFavoritesReturnsEmptyArray(t *testing.T) {
 	handler := s.routes()
 
 	// デモデータの2件を両方削除する
-	for _, username := range []string{"omomi-moti", "onevcat"} {
+	for _, username := range []string{"octocat", "onevcat"} {
 		req := httptest.NewRequest(http.MethodDelete, "/favorites/"+username, nil)
 		rec := httptest.NewRecorder()
 		handler.ServeHTTP(rec, req)
